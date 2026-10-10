@@ -1,5 +1,4 @@
 import { useState } from 'react';
-// If using React Router, import useNavigate here:
 // import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -36,6 +35,7 @@ export default function Login() {
 
             // Redirect to the dashboard
             // navigate('/dashboard');
+            alert('Login successful! Token saved to localStorage.'); // For demonstration purposes
             console.log("Login successful! Token saved.");
 
         } catch (err) {
