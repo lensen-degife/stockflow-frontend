@@ -16,7 +16,7 @@ export default function Login() {
 
         try {
             // Calling the StockFlow Lite backend we built!
-            const response = await fetch('http://localhost:3000/api/v1/auth/login', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
