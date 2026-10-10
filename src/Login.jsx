@@ -46,47 +46,57 @@ export default function Login() {
     };
 
     return (
-        <div className="w-[1440px] h-[1024px] relative bg-gray-100 overflow-hidden">
-            <div className="size-96 h-[450px] left-[520px] top-[287px] absolute bg-white rounded-xl shadow-sm" />
+        <div className="w-full min-h-screen bg-gray-100 flex items-center justify-center px-4 py-8">
+            <div className="w-full max-w-sm sm:max-w-md bg-white rounded-xl shadow-sm p-6 sm:p-10">
+                <h1 className="text-black text-xl sm:text-2xl font-bold font-['Inter'] mb-2">
+                    StockFlow Lite
+                </h1>
+                <p className="text-gray-500 text-base sm:text-lg font-bold font-['Inter'] mb-8">
+                    Sign in to your organization
+                </p>
 
-            <div className="left-[552px] top-[320px] absolute justify-start text-black text-2xl font-bold font-['Inter']">StockFlow Lite</div>
-            <div className="left-[552px] top-[387px] absolute justify-start text-gray-500 text-lg font-bold font-['Inter']">Sign in to your organization</div>
-
-            <div className="left-[552px] top-[466px] absolute justify-start text-black text-xl font-bold font-['Inter']">Email</div>
-            <div className="left-[552px] top-[565px] absolute justify-start text-black text-xl font-bold font-['Inter']">Password</div>
-
-            <form onSubmit={handleLogin}>
-
-                <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-80 h-10 left-[552px] top-[502px] absolute bg-white rounded-md border border-gray-300 px-4 outline-none focus:border-blue-600 text-black"
-                />
-
-                <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-80 h-10 left-[552px] top-[601px] absolute bg-white rounded-md border border-gray-300 px-4 outline-none focus:border-blue-600 text-black"
-                />
-
-                {error && (
-                    <div className="w-80 left-[552px] top-[640px] absolute text-red-500 text-sm text-center font-bold">
-                        {error}
+                <form onSubmit={handleLogin} className="flex flex-col gap-5">
+                    <div>
+                        <label className="block text-black text-lg sm:text-xl font-bold font-['Inter'] mb-2">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full h-10 bg-white rounded-md border border-gray-300 px-4 outline-none focus:border-blue-600 text-black"
+                        />
                     </div>
-                )}
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-80 h-10 left-[552px] top-[663px] absolute bg-blue-600 rounded-md text-white text-xl font-bold font-['Inter'] flex items-center justify-center hover:bg-blue-700 cursor-pointer disabled:opacity-50"
-                >
-                    {isLoading ? 'Signing in...' : 'Sign in'}
-                </button>
 
-            </form>
+                    <div>
+                        <label className="block text-black text-lg sm:text-xl font-bold font-['Inter'] mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full h-10 bg-white rounded-md border border-gray-300 px-4 outline-none focus:border-blue-600 text-black"
+                        />
+                    </div>
+
+                    {error && (
+                        <div className="text-red-500 text-sm text-center font-bold">
+                            {error}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-10 bg-blue-600 rounded-md text-white text-lg sm:text-xl font-bold font-['Inter'] flex items-center justify-center hover:bg-blue-700 cursor-pointer disabled:opacity-50 transition-colors"
+                    >
+                        {isLoading ? 'Signing in...' : 'Sign in'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
