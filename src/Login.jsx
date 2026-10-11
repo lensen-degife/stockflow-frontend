@@ -34,17 +34,18 @@ export default function Login() {
             // 1. Save the token
             localStorage.setItem('token', data.data.token);
 
-            // 2. Decode the token to extract the organization_id if available
+            // 2. Decode the token to automatically extract organization info
             try {
                 const decodedPayload = jwtDecode(data.data.token);
 
-                // Check both the token payload AND the user object just in case
-                const orgId = decodedPayload.organization_id || data.data.user?.organization_id;
+                const orgId = decodedPayload.organization_id || decodedPayload.orgId || data.data.user?.organization_id;
+                const orgName = decodedPayload.organization_name || data.data.user?.organization_name;
 
                 if (orgId) {
                     localStorage.setItem('organization_id', orgId);
-                } else {
-                    console.warn("Warning: No organization_id found in token or user object.");
+                }
+                if (orgName) {
+                    localStorage.setItem('organization_name', orgName);
                 }
             } catch (decodeError) {
                 console.error("Failed to decode token", decodeError);
