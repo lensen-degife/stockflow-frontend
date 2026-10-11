@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import OrderDrawer from './OrderDrawer';
+import CreateOrderModal from './CreateOrderModal';
 
 export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
     // State to track which order is clicked, and if the drawer is open
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
     const [orders, setOrders] = useState([
         { id: 'ORD-9021', customer: 'Sarah Connor', items: 3, total: '$420.00', status: 'RESERVED' },
         { id: 'ORD-9022', customer: 'John Smith', items: 1, total: '$150.00', status: 'CONFIRMED' },
@@ -31,51 +34,66 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
     };
 
     // We pass both the API action route and the new resulting status
-  const handleUpdateStatus = async (orderId, action, newStatus) => {
-    try {
-      const orgId = activeOrgId || localStorage.getItem('organization_id');
+    const handleUpdateStatus = async (orderId, action, newStatus) => {
+        try {
+            const orgId = activeOrgId || localStorage.getItem('organization_id');
 
-      if (!orgId) {
-        alert('No active organization selected! Please set or create an organization first.');
-        if (onOpenOrgModal) onOpenOrgModal();
-        return;
-      }
+            if (!orgId) {
+                alert('No active organization selected! Please set or create an organization first.');
+                if (onOpenOrgModal) onOpenOrgModal();
+                return;
+            }
 
-      const token = localStorage.getItem('token');
-      // Backend order IDs must be UUIDs; dummy demo orders (e.g. ORD-9023) update locally
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId);
+            const token = localStorage.getItem('token');
+            // Backend order IDs must be UUIDs; dummy demo orders (e.g. ORD-9023) update locally
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId);
 
-      if (isUUID) {
-        // Calls POST /api/v1/orders/:orderId/:action?organization_id=<ORG_UUID>
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}/${action}?organization_id=${orgId}`, {
-          method: 'POST', 
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+            if (isUUID) {
+                // Calls POST /api/v1/orders/:orderId/:action?organization_id=<ORG_UUID>
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}/${action}?organization_id=${orgId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-        const data = await response.json();
+                const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error?.message || `Failed to ${action} order`);
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `Failed to ${action} order`);
+                }
+            }
+
+            // 1. Update the table data instantly
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
+                    order.id === orderId ? { ...order, status: newStatus } : order
+                )
+            );
+
+            // 2. Update the drawer data so the buttons change instantly
+            setSelectedOrder(prev => (prev ? { ...prev, status: newStatus } : null));
+
+        } catch (err) {
+            alert(err.message);
         }
-      }
+    };
 
-      // 1. Update the table data instantly
-      setOrders(prevOrders => 
-        prevOrders.map(order => 
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-      
-      // 2. Update the drawer data so the buttons change instantly
-      setSelectedOrder(prev => (prev ? { ...prev, status: newStatus } : null));
-
-    } catch (err) {
-      alert(err.message); 
-    }
-  };
+    const handleOrderCreated = (newOrder) => {
+        if (newOrder) {
+            setOrders(prev => [
+                {
+                    id: newOrder.id,
+                    customer: newOrder.customer_id ? `${newOrder.customer_id.slice(0, 8)}...` : 'Customer',
+                    items: newOrder.items?.length || 1,
+                    total: `$${Number(newOrder.total || 0).toFixed(2)}`,
+                    status: newOrder.status || 'DRAFT'
+                },
+                ...prev
+            ]);
+        }
+    };
 
     return (
         <>
@@ -86,7 +104,10 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
                         placeholder="Search orders..."
                         className="w-64 h-9 px-3 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500"
                     />
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors">
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
+                    >
                         + Create Order
                     </button>
                 </div>
@@ -129,6 +150,11 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
                 order={selectedOrder}
                 onClose={() => setIsDrawerOpen(false)}
                 onUpdateStatus={handleUpdateStatus} // Pass the function here!
+            />
+            <CreateOrderModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onOrderCreated={handleOrderCreated}
             />
         </>
     );
