@@ -5,12 +5,11 @@ export default function OrdersTable() {
     // State to track which order is clicked, and if the drawer is open
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-    const dummyOrders = [
+    const [orders, setOrders] = useState([
         { id: 'ORD-9021', customer: 'Sarah Connor', items: 3, total: '$420.00', status: 'RESERVED' },
         { id: 'ORD-9022', customer: 'John Smith', items: 1, total: '$150.00', status: 'CONFIRMED' },
         { id: 'ORD-9023', customer: 'Acme Corp', items: 12, total: '$2,400.00', status: 'DRAFT' },
-    ];
+    ]);
 
     const getStatusBadge = (status) => {
         const styles = {
@@ -54,9 +53,11 @@ export default function OrdersTable() {
       }
 
       // 1. Update the table data instantly
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ));
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
       
       // 2. Update the drawer data so the buttons change instantly
       setSelectedOrder(prev => ({ ...prev, status: newStatus }));
@@ -92,7 +93,7 @@ export default function OrdersTable() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {dummyOrders.map((order) => (
+                            {orders.map((order) => (
                                 <tr
                                     key={order.id}
                                     onClick={() => handleRowClick(order)} // Click handler added here

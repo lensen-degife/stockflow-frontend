@@ -1,4 +1,4 @@
-export default function OrderDrawer({ isOpen, onClose, order }) {
+export default function OrderDrawer({ isOpen, onClose, order, onUpdateStatus }) {
     // If the drawer is closed, don't render anything
     if (!isOpen || !order) return null;
 
