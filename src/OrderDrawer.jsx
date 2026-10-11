@@ -47,7 +47,7 @@ export default function OrderDrawer({ isOpen, onClose, order }) {
 
                     {order.status === 'DRAFT' && (
                         <button
-                            onClick={() => onUpdateStatus(order.id, 'RESERVED')}
+                            onClick={() => onUpdateStatus(order.id, 'reserve', 'RESERVED')}
                             className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition-colors"
                         >
                             Reserve Stock
@@ -57,13 +57,13 @@ export default function OrderDrawer({ isOpen, onClose, order }) {
                     {order.status === 'RESERVED' && (
                         <>
                             <button
-                                onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}
+                                onClick={() => onUpdateStatus(order.id, 'confirm', 'CONFIRMED')}
                                 className="w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors"
                             >
                                 Confirm Order
                             </button>
                             <button
-                                onClick={() => onUpdateStatus(order.id, 'CANCELLED')}
+                                onClick={() => onUpdateStatus(order.id, 'cancel', 'CANCELLED')}
                                 className="w-full bg-red-100 text-red-600 font-bold py-3 rounded-md hover:bg-red-200 transition-colors"
                             >
                                 Cancel Order
@@ -73,13 +73,14 @@ export default function OrderDrawer({ isOpen, onClose, order }) {
 
                     {order.status === 'CONFIRMED' && (
                         <button
-                            onClick={() => onUpdateStatus(order.id, 'FULFILLED')}
+                            onClick={() => onUpdateStatus(order.id, 'fulfill', 'FULFILLED')}
                             className="w-full bg-gray-900 text-white font-bold py-3 rounded-md hover:bg-black transition-colors"
                         >
                             Mark as Fulfilled
                         </button>
                     )}
                 </div>
+
 
             </div>
         </div>

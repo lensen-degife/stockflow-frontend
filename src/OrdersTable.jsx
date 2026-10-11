@@ -31,36 +31,40 @@ export default function OrdersTable() {
         setIsDrawerOpen(true);
     };
 
-    const handleUpdateStatus = async (orderId, newStatus) => {
-        try {
-            const token = localStorage.getItem('token');
-
-            // Adjust this URL and Method to match your existing backend route
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update order status');
-            }
-
-            // 1. Update the table data instantly
-            setOrders(orders.map(order =>
-                order.id === orderId ? { ...order, status: newStatus } : order
-            ));
-
-            // 2. Update the drawer data so the buttons change instantly
-            setSelectedOrder(prev => ({ ...prev, status: newStatus }));
-
-        } catch (err) {
-            alert(err.message); // In a real app, use a toast notification here
+    // We pass both the API action route and the new resulting status
+  const handleUpdateStatus = async (orderId, action, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      // Fetch your current organization ID (assuming it is saved during login)
+      const orgId = localStorage.getItem('organization_id') || '00000000-0000-0000-0000-000000000000'; 
+      
+      // Calls POST /api/v1/orders/:orderId/:action?organization_id=<ORG_UUID>
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}/${action}?organization_id=${orgId}`, {
+        method: 'POST', 
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-    };
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || `Failed to ${action} order`);
+      }
+
+      // 1. Update the table data instantly
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+      
+      // 2. Update the drawer data so the buttons change instantly
+      setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+
+    } catch (err) {
+      alert(err.message); 
+    }
+  };
 
     return (
         <>
