@@ -31,19 +31,10 @@ export default function Login() {
                 throw new Error(data.error?.message || 'Login failed');
             }
 
-            // Success! Save the token to localStorage
-            localStorage.setItem('token', data.data.token);
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error?.message || 'Login failed');
-            }
-
             // 1. Save the token
             localStorage.setItem('token', data.data.token);
 
-            // 2. Decode the token to extract the organization_id
+            // 2. Decode the token to extract the organization_id if available
             try {
                 const decodedPayload = jwtDecode(data.data.token);
 
@@ -60,8 +51,6 @@ export default function Login() {
             }
 
             // 3. Redirect to the dashboard
-            navigate('/dashboard');
-            // Redirect to the dashboard
             navigate('/dashboard');
 
         } catch (err) {
