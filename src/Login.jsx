@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode"; 
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -33,6 +34,33 @@ export default function Login() {
             // Success! Save the token to localStorage
             localStorage.setItem('token', data.data.token);
 
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'Login failed');
+            }
+
+            // 1. Save the token
+            localStorage.setItem('token', data.data.token);
+
+            // 2. Decode the token to extract the organization_id
+            try {
+                const decodedPayload = jwtDecode(data.data.token);
+
+                // Check both the token payload AND the user object just in case
+                const orgId = decodedPayload.organization_id || data.data.user?.organization_id;
+
+                if (orgId) {
+                    localStorage.setItem('organization_id', orgId);
+                } else {
+                    console.warn("Warning: No organization_id found in token or user object.");
+                }
+            } catch (decodeError) {
+                console.error("Failed to decode token", decodeError);
+            }
+
+            // 3. Redirect to the dashboard
+            navigate('/dashboard');
             // Redirect to the dashboard
             navigate('/dashboard');
 
