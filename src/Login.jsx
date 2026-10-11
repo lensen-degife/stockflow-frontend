@@ -35,8 +35,6 @@ export default function Login() {
 
             // Redirect to the dashboard
             navigate('/dashboard');
-            alert('Login successful! Token saved to localStorage.'); // For demonstration purposes
-            console.log("Login successful! Token saved.");
 
         } catch (err) {
             setError(err.message);
