@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import OrderDrawer from './OrderDrawer';
 
-export default function OrdersTable() {
+export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
     // State to track which order is clicked, and if the drawer is open
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -33,23 +33,33 @@ export default function OrdersTable() {
     // We pass both the API action route and the new resulting status
   const handleUpdateStatus = async (orderId, action, newStatus) => {
     try {
+      const orgId = activeOrgId || localStorage.getItem('organization_id');
+
+      if (!orgId) {
+        alert('No active organization selected! Please set or create an organization first.');
+        if (onOpenOrgModal) onOpenOrgModal();
+        return;
+      }
+
       const token = localStorage.getItem('token');
-      // Fetch your current organization ID (assuming it is saved during login)
-      const orgId = localStorage.getItem('organization_id') || '00000000-0000-0000-0000-000000000000'; 
-      
-      // Calls POST /api/v1/orders/:orderId/:action?organization_id=<ORG_UUID>
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}/${action}?organization_id=${orgId}`, {
-        method: 'POST', 
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      // Backend order IDs must be UUIDs; dummy demo orders (e.g. ORD-9023) update locally
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId);
+
+      if (isUUID) {
+        // Calls POST /api/v1/orders/:orderId/:action?organization_id=<ORG_UUID>
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/${orderId}/${action}?organization_id=${orgId}`, {
+          method: 'POST', 
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || `Failed to ${action} order`);
         }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || `Failed to ${action} order`);
       }
 
       // 1. Update the table data instantly
@@ -60,7 +70,7 @@ export default function OrdersTable() {
       );
       
       // 2. Update the drawer data so the buttons change instantly
-      setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+      setSelectedOrder(prev => (prev ? { ...prev, status: newStatus } : null));
 
     } catch (err) {
       alert(err.message); 
