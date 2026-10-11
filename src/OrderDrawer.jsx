@@ -43,26 +43,40 @@ export default function OrderDrawer({ isOpen, onClose, order }) {
         </div>
 
         {/* The State Machine Actions (Footer) */}
+     {/* The State Machine Actions (Footer) */}
         <div className="p-6 border-t border-gray-200 bg-white gap-3 flex flex-col">
+          
           {order.status === 'DRAFT' && (
-            <button className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => onUpdateStatus(order.id, 'RESERVED')}
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition-colors"
+            >
               Reserve Stock
             </button>
           )}
           
           {order.status === 'RESERVED' && (
             <>
-              <button className="w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors">
+              <button 
+                onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}
+                className="w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors"
+              >
                 Confirm Order
               </button>
-              <button className="w-full bg-red-100 text-red-600 font-bold py-3 rounded-md hover:bg-red-200 transition-colors">
+              <button 
+                onClick={() => onUpdateStatus(order.id, 'CANCELLED')}
+                className="w-full bg-red-100 text-red-600 font-bold py-3 rounded-md hover:bg-red-200 transition-colors"
+              >
                 Cancel Order
               </button>
             </>
           )}
 
           {order.status === 'CONFIRMED' && (
-            <button className="w-full bg-gray-900 text-white font-bold py-3 rounded-md hover:bg-black transition-colors">
+            <button 
+              onClick={() => onUpdateStatus(order.id, 'FULFILLED')}
+              className="w-full bg-gray-900 text-white font-bold py-3 rounded-md hover:bg-black transition-colors"
+            >
               Mark as Fulfilled
             </button>
           )}
