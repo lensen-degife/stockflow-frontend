@@ -1,5 +1,5 @@
 import { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -7,7 +7,7 @@ export default function Login() {
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault(); // Prevents the page from refreshing
@@ -34,7 +34,7 @@ export default function Login() {
             localStorage.setItem('token', data.data.token);
 
             // Redirect to the dashboard
-            // navigate('/dashboard');
+            navigate('/dashboard');
             alert('Login successful! Token saved to localStorage.'); // For demonstration purposes
             console.log("Login successful! Token saved.");
 
