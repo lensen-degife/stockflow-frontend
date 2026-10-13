@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdjustStockModal from './AdjustStockModal';
 
-export default function InventoryTable() {
+export default function InventoryTable({ activeOrgId }) {
     const [inventory, setInventory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
 
-    const fetchInventory = async () => {
+    const fetchInventory = useCallback(async () => {
         try {
+            setIsLoading(true);
+            setError(null);
             const token = localStorage.getItem('token');
-            const orgId = localStorage.getItem('organization_id') || '';
+            const orgId = activeOrgId || localStorage.getItem('organization_id') || '';
+
+            if (!token) {
+                setIsLoading(false);
+                return;
+            }
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/inventory?organization_id=${orgId}`, {
                 method: 'GET',
@@ -22,21 +28,20 @@ export default function InventoryTable() {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error?.message || 'Failed to fetch inventory');
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'Failed to fetch inventory');
+            }
             setInventory(data.data || []);
         } catch (err) {
             setError(err.message);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [activeOrgId]);
 
     useEffect(() => {
         fetchInventory();
-    }, []);
-
-    if (isLoading) return <div className="p-8 text-center text-gray-500 font-bold">Loading inventory...</div>;
-    if (error) return <div className="p-8 text-center text-red-500 font-bold">Error: {error}</div>;
+    }, [fetchInventory]);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -44,11 +49,17 @@ export default function InventoryTable() {
                 <h2 className="text-lg font-bold text-gray-800">Current Stock Levels</h2>
                 <button
                     onClick={() => setIsAdjustModalOpen(true)}
-                    className="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
                 >
-                    Adjust Stock
+                    + Adjust Stock
                 </button>
             </div>
+
+            {error && (
+                <div className="p-4 bg-red-50 border-b border-red-200 text-red-600 text-sm font-semibold">
+                    Error loading inventory: {error}
+                </div>
+            )}
 
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -61,19 +72,39 @@ export default function InventoryTable() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {inventory.length === 0 ? (
+                        {isLoading ? (
                             <tr>
-                                <td colSpan="4" className="px-6 py-8 text-center text-gray-500">No inventory records found.</td>
+                                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+                                        Loading inventory...
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : inventory.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500 font-medium">
+                                    No inventory records found. Click "+ Adjust Stock" to add inventory.
+                                </td>
                             </tr>
                         ) : (
                             inventory.map((item, index) => (
-                                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 text-sm font-bold text-gray-900">{item.product_id || item.sku}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">{item.warehouse_id || item.warehouse_name}</td>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.quantity}</td>
+                                <tr key={item.id || index} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                                        <div>{item.sku || item.product_id}</div>
+                                        {item.product_name && (
+                                            <div className="text-xs text-gray-500 font-normal">{item.product_name}</div>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                        {item.warehouse_name || item.warehouse_id}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        {item.quantity}
+                                    </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.quantity > 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                                            {item.quantity > 20 ? 'IN STOCK' : 'LOW STOCK'}
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${Number(item.quantity) > 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                            {Number(item.quantity) > 20 ? 'IN STOCK' : 'LOW STOCK'}
                                         </span>
                                     </td>
                                 </tr>
