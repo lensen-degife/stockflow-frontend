@@ -34,21 +34,29 @@ export default function Login() {
             // 1. Save the token
             localStorage.setItem('token', data.data.token);
 
-            // 2. Decode the token to automatically extract organization info
+            // 2. Decode the token to extract organization_id
+            let organizationId = null;
             try {
-                const decodedPayload = jwtDecode(data.data.token);
-
-                const orgId = decodedPayload.organization_id || decodedPayload.orgId || data.data.user?.organization_id;
-                const orgName = decodedPayload.organization_name || data.data.user?.organization_name;
-
-                if (orgId) {
-                    localStorage.setItem('organization_id', orgId);
-                }
-                if (orgName) {
-                    localStorage.setItem('organization_name', orgName);
-                }
+                const decodedToken = jwtDecode(data.data.token);
+                organizationId = decodedToken?.organization_id;
             } catch (decodeError) {
                 console.error("Failed to decode token", decodeError);
+            }
+
+            // Fallback to checking data.data.user.organization_id if it is not in the root payload
+            if (!organizationId && data?.data?.user?.organization_id) {
+                organizationId = data.data.user.organization_id;
+            }
+
+            // Save organization_id to localStorage
+            if (organizationId) {
+                localStorage.setItem('organization_id', organizationId);
+            }
+
+            // Save organization_name to localStorage if available
+            const organizationName = data?.data?.user?.organization_name;
+            if (organizationName) {
+                localStorage.setItem('organization_name', organizationName);
             }
 
             // 3. Redirect to the dashboard

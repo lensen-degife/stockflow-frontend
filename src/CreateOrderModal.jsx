@@ -8,10 +8,13 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
   const [unitPrice, setUnitPrice] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [error, setError] = useState(null);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
     try {
@@ -20,14 +23,13 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
       if (!orgId) {
         throw new Error('No active organization found. Please select or create an organization first.');
       }
-      const idempotencyKey = crypto.randomUUID(); // Generates a unique key for the header
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders`, {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/v1/orders', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey
+          'Idempotency-Key': crypto.randomUUID()
         },
         body: JSON.stringify({
           organization_id: orgId,
@@ -49,19 +51,21 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
         throw new Error(data.error?.message || 'Failed to create order');
       }
 
-      // Clear form and close modal
+      // Clear form, notify listener, and close modal
       setCustomerId('');
       setProductId('');
       setWarehouseId('');
-      setQuantity(1);
+      setQuantity('');
       setUnitPrice('');
       if (onOrderCreated) {
         onOrderCreated(data.data);
       }
-      onClose();
+      if (onClose) {
+        onClose();
+      }
 
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +106,12 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
               <input required type="number" step="0.01" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600" />
             </div>
           </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm font-medium">
+              {error}
+            </div>
+          )}
 
           <div className="mt-4 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-md">Cancel</button>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import OrderDrawer from './OrderDrawer';
 import CreateOrderModal from './CreateOrderModal';
 
@@ -80,20 +80,68 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
         }
     };
 
-    const handleOrderCreated = (newOrder) => {
-        if (newOrder) {
-            setOrders(prev => [
-                {
-                    id: newOrder.id,
-                    customer: newOrder.customer_id ? `${newOrder.customer_id.slice(0, 8)}...` : 'Customer',
-                    items: newOrder.items?.length || 1,
-                    total: `$${Number(newOrder.total || 0).toFixed(2)}`,
-                    status: newOrder.status || 'DRAFT'
+    const fetchOrders = useCallback(async (newOrder) => {
+        try {
+            const orgId = activeOrgId || localStorage.getItem('organization_id');
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const url = orgId
+                ? `${import.meta.env.VITE_API_URL}/api/v1/orders?organization_id=${orgId}`
+                : `${import.meta.env.VITE_API_URL}/api/v1/orders`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-                ...prev
-            ]);
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const fetchedOrders = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+                setOrders(
+                    fetchedOrders.map((order) => ({
+                        id: order.id,
+                        customer: order.customer_name || (order.customer_id ? `${order.customer_id.slice(0, 8)}...` : 'Customer'),
+                        items: order.items?.length || order.item_count || 1,
+                        total: `$${Number(order.total || 0).toFixed(2)}`,
+                        status: order.status || 'DRAFT',
+                    }))
+                );
+            } else if (newOrder && newOrder.id) {
+                // If GET /orders is not supported yet by backend, append newly created order
+                setOrders((prev) => [
+                    {
+                        id: newOrder.id,
+                        customer: newOrder.customer_id ? `${newOrder.customer_id.slice(0, 8)}...` : 'Customer',
+                        items: newOrder.items?.length || 1,
+                        total: `$${Number(newOrder.total || 0).toFixed(2)}`,
+                        status: newOrder.status || 'DRAFT',
+                    },
+                    ...prev,
+                ]);
+            }
+        } catch (err) {
+            console.error('Failed to fetch orders:', err);
+            if (newOrder && newOrder.id) {
+                setOrders((prev) => [
+                    {
+                        id: newOrder.id,
+                        customer: newOrder.customer_id ? `${newOrder.customer_id.slice(0, 8)}...` : 'Customer',
+                        items: newOrder.items?.length || 1,
+                        total: `$${Number(newOrder.total || 0).toFixed(2)}`,
+                        status: newOrder.status || 'DRAFT',
+                    },
+                    ...prev,
+                ]);
+            }
         }
-    };
+    }, [activeOrgId]);
+
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
 
     return (
         <>
@@ -106,7 +154,7 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
                     />
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
                     >
                         + Create Order
                     </button>
@@ -154,7 +202,7 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
             <CreateOrderModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onOrderCreated={handleOrderCreated}
+                onOrderCreated={fetchOrders}
             />
         </>
     );
