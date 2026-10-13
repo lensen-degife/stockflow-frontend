@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
   const [customerId, setCustomerId] = useState('');
@@ -7,8 +7,38 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
   const [quantity, setQuantity] = useState(1);
   const [unitPrice, setUnitPrice] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const [error, setError] = useState(null);
+
+  const [customers, setCustomers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const token = localStorage.getItem('token');
+    const orgId = localStorage.getItem('organization_id');
+    if (!token || !orgId) return;
+
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/customers?organization_id=${orgId}`, { headers })
+      .then(res => res.json())
+      .then(data => { if (data.data) setCustomers(data.data); })
+      .catch(() => {});
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/products?organization_id=${orgId}`, { headers })
+      .then(res => res.json())
+      .then(data => { if (data.data) setProducts(data.data); })
+      .catch(() => {});
+
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/warehouses?organization_id=${orgId}`, { headers })
+      .then(res => res.json())
+      .then(data => { if (data.data) setWarehouses(data.data); })
+      .catch(() => {});
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -81,18 +111,94 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Customer ID</label>
-            <input required type="text" value={customerId} onChange={e => setCustomerId(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600" />
+            <label className="block text-sm font-bold text-gray-700 mb-1">Customer</label>
+            {customers.length > 0 ? (
+              <select
+                required
+                value={customerId}
+                onChange={e => setCustomerId(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600 bg-white text-gray-900"
+              >
+                <option value="">Select Customer...</option>
+                {customers.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.email})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                required
+                type="text"
+                placeholder="Customer UUID"
+                value={customerId}
+                onChange={e => setCustomerId(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600"
+              />
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Product ID</label>
-              <input required type="text" value={productId} onChange={e => setProductId(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600" />
+              <label className="block text-sm font-bold text-gray-700 mb-1">Product</label>
+              {products.length > 0 ? (
+                <select
+                  required
+                  value={productId}
+                  onChange={e => {
+                    const pid = e.target.value;
+                    setProductId(pid);
+                    const chosen = products.find(p => p.id === pid);
+                    if (chosen && chosen.price && !unitPrice) {
+                      setUnitPrice(chosen.price);
+                    }
+                  }}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600 bg-white text-gray-900"
+                >
+                  <option value="">Select Product...</option>
+                  {products.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (${Number(p.price).toFixed(2)})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  required
+                  type="text"
+                  placeholder="Product UUID"
+                  value={productId}
+                  onChange={e => setProductId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600"
+                />
+              )}
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Warehouse ID</label>
-              <input required type="text" value={warehouseId} onChange={e => setWarehouseId(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600" />
+              <label className="block text-sm font-bold text-gray-700 mb-1">Warehouse</label>
+              {warehouses.length > 0 ? (
+                <select
+                  required
+                  value={warehouseId}
+                  onChange={e => setWarehouseId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600 bg-white text-gray-900"
+                >
+                  <option value="">Select Warehouse...</option>
+                  {warehouses.map(w => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  required
+                  type="text"
+                  placeholder="Warehouse UUID"
+                  value={warehouseId}
+                  onChange={e => setWarehouseId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 outline-none focus:border-blue-600"
+                />
+              )}
             </div>
           </div>
 
