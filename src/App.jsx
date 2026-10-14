@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Login from './Login';
 import Signup from './Signup';
+import Onboarding from './Onboarding';
 import Dashboard from './Dashboard';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -18,6 +19,16 @@ export default function App() {
         
         {/* The Signup Route */}
         <Route path="/signup" element={<Signup />} />
+        
+        {/* The Onboarding Route */}
+        <Route 
+          path="/onboarding" 
+          element={
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* The Dashboard Route */}
         <Route 

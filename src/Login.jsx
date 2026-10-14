@@ -58,9 +58,14 @@ export default function Login() {
                 localStorage.setItem('organization_name', organizationName);
             }
 
-            // 3. Redirect to the dashboard
+            // 3. Redirect to the dashboard or onboarding
             toast.success('Logged in successfully');
-            navigate('/dashboard');
+            const orgId = organizationId;
+            if (orgId) {
+                navigate('/dashboard');
+            } else {
+                navigate('/onboarding');
+            }
 
         } catch (err) {
             toast.error(err.message);
