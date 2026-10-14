@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import AdjustStockModal from './AdjustStockModal';
+import TableSkeleton from './TableSkeleton';
 
 export default function InventoryTable({ activeOrgId }) {
     const [inventory, setInventory] = useState([]);
@@ -73,46 +74,41 @@ export default function InventoryTable({ activeOrgId }) {
                             <th className="px-6 py-4 font-bold">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-                                        Loading inventory...
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : inventory.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500 font-medium">
-                                    No inventory records found. Click "+ Adjust Stock" to add inventory.
-                                </td>
-                            </tr>
-                        ) : (
-                            inventory.map((item, index) => (
-                                <tr key={item.id || index} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 text-sm font-bold text-gray-900">
-                                        <div>{item.sku || item.product_id}</div>
-                                        {item.product_name && (
-                                            <div className="text-xs text-gray-500 font-normal">{item.product_name}</div>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">
-                                        {item.warehouse_name || item.warehouse_id}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                        {item.quantity}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${Number(item.quantity) > 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                                            {Number(item.quantity) > 20 ? 'IN STOCK' : 'LOW STOCK'}
-                                        </span>
+                    {isLoading ? (
+                        <TableSkeleton columns={4} />
+                    ) : (
+                        <tbody className="divide-y divide-gray-200">
+                            {inventory.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="px-6 py-12 text-center text-sm text-gray-500 font-medium">
+                                        No inventory records found. Click "+ Adjust Stock" to add inventory.
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
+                            ) : (
+                                inventory.map((item, index) => (
+                                    <tr key={item.id || index} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                                            <div>{item.sku || item.product_id}</div>
+                                            {item.product_name && (
+                                                <div className="text-xs text-gray-500 font-normal">{item.product_name}</div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {item.warehouse_name || item.warehouse_id}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                            {item.quantity}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${Number(item.quantity) > 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                                {Number(item.quantity) > 20 ? 'IN STOCK' : 'LOW STOCK'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    )}
                 </table>
             </div>
 

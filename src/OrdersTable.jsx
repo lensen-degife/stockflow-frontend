@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import OrderDrawer from './OrderDrawer';
 import CreateOrderModal from './CreateOrderModal';
+import TableSkeleton from './TableSkeleton';
 
 export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
     // State to track which order is clicked, and if the drawer is open
@@ -188,42 +189,37 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
                                 <th className="px-6 py-4 font-bold">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
-                                            Loading orders from database...
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : filteredOrders.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
-                                        {searchQuery ? 'No orders match your search.' : 'No orders found in database. Click "+ Create Order" to place your first order.'}
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredOrders.map((order) => (
-                                    <tr
-                                        key={order.id}
-                                        onClick={() => handleRowClick(order)}
-                                        className="hover:bg-gray-50 transition-colors cursor-pointer"
-                                    >
-                                        <td className="px-6 py-4 text-sm font-bold text-gray-900 font-mono" title={order.id}>
-                                            {order.id.length > 13 ? `${order.id.slice(0, 8)}...` : order.id}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{order.customer}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{order.items}</td>
-                                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.total}</td>
-                                        <td className="px-6 py-4">
-                                            {getStatusBadge(order.status)}
+                        {isLoading ? (
+                            <TableSkeleton columns={5} />
+                        ) : (
+                            <tbody className="divide-y divide-gray-200">
+                                {filteredOrders.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
+                                            {searchQuery ? 'No orders match your search.' : 'No orders found in database. Click "+ Create Order" to place your first order.'}
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
+                                ) : (
+                                    filteredOrders.map((order) => (
+                                        <tr
+                                            key={order.id}
+                                            onClick={() => handleRowClick(order)}
+                                            className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                        >
+                                            <td className="px-6 py-4 text-sm font-bold text-gray-900 font-mono" title={order.id}>
+                                                {order.id.length > 13 ? `${order.id.slice(0, 8)}...` : order.id}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">{order.customer}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">{order.items}</td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.total}</td>
+                                            <td className="px-6 py-4">
+                                                {getStatusBadge(order.status)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        )}
                     </table>
                 </div>
             </div>
