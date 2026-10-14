@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OrdersTable from './OrdersTable';
 import InventoryTable from './InventoryTable';
+import Settings from './Settings';
 import OrganizationModal from './OrganizationModal';
 import SummaryCards from './SummaryCards';
 
@@ -50,6 +51,12 @@ export default function Dashboard() {
             Inventory
           </button>
           <button 
+            onClick={() => setActiveView('settings')}
+            className={`text-left px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeView === 'settings' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800 text-gray-300'}`}
+          >
+            Settings
+          </button>
+          <button 
             onClick={handleLogout}
             className="mt-auto text-left px-4 py-2 rounded-md font-medium transition-colors cursor-pointer hover:bg-gray-800 text-gray-300"
           >
@@ -63,7 +70,11 @@ export default function Dashboard() {
         
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
           <h1 className="text-xl font-bold text-gray-800">
-            {activeView === 'orders' ? 'Orders Pipeline' : 'Inventory Management'}
+            {activeView === 'settings'
+              ? 'Organization Settings'
+              : activeView === 'orders'
+              ? 'Orders Pipeline'
+              : 'Inventory Management'}
           </h1>
           <div className="flex items-center gap-4">
             {currentOrg.id ? (
@@ -106,6 +117,11 @@ export default function Dashboard() {
           )}
           {activeView === 'inventory' && (
             <InventoryTable 
+              activeOrgId={currentOrg.id}
+            />
+          )}
+          {activeView === 'settings' && (
+            <Settings 
               activeOrgId={currentOrg.id}
             />
           )}
