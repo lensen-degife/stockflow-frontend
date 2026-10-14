@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import OrdersTable from './OrdersTable';
 import InventoryTable from './InventoryTable';
 import OrganizationModal from './OrganizationModal';
+import SummaryCards from './SummaryCards';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -96,6 +97,7 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 overflow-auto p-8">
+          <SummaryCards />
           {activeView === 'orders' && (
             <OrdersTable 
               onOpenOrgModal={() => setIsOrgModalOpen(true)}
