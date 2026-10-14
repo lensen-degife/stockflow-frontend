@@ -20,6 +20,8 @@ export default function Onboarding() {
 
         try {
             const token = localStorage.getItem('token');
+
+            // 1. Create the organization
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/organizations`, {
                 method: 'POST',
                 headers: {
@@ -32,16 +34,53 @@ export default function Onboarding() {
                 }),
             });
 
-            const data = await response.json();
+            const orgData = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error?.message || 'Failed to create organization');
+                throw new Error(orgData.error?.message || 'Failed to create organization');
             }
 
-            const orgId = data.data.id;
+            const orgId = orgData.data.id;
+
+            // 2. Fetch the User's Email
+            const meResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const meData = await meResponse.json();
+
+            if (!meResponse.ok) {
+                throw new Error(meData.error?.message || 'Failed to fetch user email');
+            }
+
+            const userEmail = meData.data.email;
+
+            // 3. Chain the Member Addition Request
+            const memberResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/organizations/${orgId}/members`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    role: 'org_admin',
+                }),
+            });
+
+            const memberData = await memberResponse.json();
+
+            if (!memberResponse.ok) {
+                throw new Error(memberData.error?.message || 'Failed to add member to organization');
+            }
+
+            // 4. Finalize the Flow
             localStorage.setItem('organization_id', orgId);
-            if (data.data.name) {
-                localStorage.setItem('organization_name', data.data.name);
+            if (orgData.data.name) {
+                localStorage.setItem('organization_name', orgData.data.name);
             }
 
             toast.success('Organization created successfully!');
