@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import AdjustStockModal from './AdjustStockModal';
 
 export default function InventoryTable({ activeOrgId }) {
@@ -34,6 +35,7 @@ export default function InventoryTable({ activeOrgId }) {
             setInventory(data.data || []);
         } catch (err) {
             setError(err.message);
+            toast.error(err.message);
         } finally {
             setIsLoading(false);
         }

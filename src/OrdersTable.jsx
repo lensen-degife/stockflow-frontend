@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import OrderDrawer from './OrderDrawer';
 import CreateOrderModal from './CreateOrderModal';
 
@@ -38,7 +39,7 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
             const orgId = activeOrgId || localStorage.getItem('organization_id');
 
             if (!orgId) {
-                alert('No active organization selected! Please set or create an organization first.');
+                toast.error('No active organization selected! Please set or create an organization first.');
                 if (onOpenOrgModal) onOpenOrgModal();
                 return;
             }
@@ -68,11 +69,13 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
             // 2. Update the drawer data so the buttons change instantly
             setSelectedOrder(prev => (prev ? { ...prev, status: newStatus } : null));
 
+            toast.success('Status updated!');
+
             // 3. Re-fetch from database to keep in sync
             fetchOrders();
 
         } catch (err) {
-            alert(err.message);
+            toast.error(err.message);
         }
     };
 
@@ -123,6 +126,7 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
             }
         } catch (err) {
             console.error('Failed to fetch orders:', err);
+            toast.error(err.message);
             if (newOrder && newOrder.id) {
                 setOrders((prev) => [
                     {

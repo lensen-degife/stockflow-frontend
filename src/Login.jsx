@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode"; 
+import toast from 'react-hot-toast';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault(); // Prevents the page from refreshing
-        setError(null);
         setIsLoading(true);
 
         try {
@@ -60,10 +59,11 @@ export default function Login() {
             }
 
             // 3. Redirect to the dashboard
+            toast.success('Logged in successfully');
             navigate('/dashboard');
 
         } catch (err) {
-            setError(err.message);
+            toast.error(err.message);
         } finally {
             setIsLoading(false);
         }
@@ -105,12 +105,6 @@ export default function Login() {
                             className="w-full h-10 bg-white rounded-md border border-gray-300 px-4 outline-none focus:border-blue-600 text-black"
                         />
                     </div>
-
-                    {error && (
-                        <div className="text-red-500 text-sm text-center font-bold">
-                            {error}
-                        </div>
-                    )}
 
                     <button
                         type="submit"

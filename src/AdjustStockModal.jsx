@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export default function AdjustStockModal({ isOpen, onClose, onStockAdjusted }) {
   const [productId, setProductId] = useState('');
@@ -73,12 +74,14 @@ export default function AdjustStockModal({ isOpen, onClose, onStockAdjusted }) {
       if (onStockAdjusted) {
         onStockAdjusted();
       }
+      toast.success('Stock adjusted successfully!');
       if (onClose) {
         onClose();
       }
 
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }

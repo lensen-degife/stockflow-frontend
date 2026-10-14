@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
   const [customerId, setCustomerId] = useState('');
@@ -90,12 +91,14 @@ export default function CreateOrderModal({ isOpen, onClose, onOrderCreated }) {
       if (onOrderCreated) {
         onOrderCreated(data.data);
       }
+      toast.success('Order created successfully!');
       if (onClose) {
         onClose();
       }
 
     } catch (err) {
       setError(err.message);
+      toast.error(err.message);
     } finally {
       setIsLoading(false);
     }
