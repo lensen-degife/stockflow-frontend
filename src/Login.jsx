@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode"; 
 import toast from 'react-hot-toast';
 
@@ -113,6 +113,13 @@ export default function Login() {
                     >
                         {isLoading ? 'Signing in...' : 'Sign in'}
                     </button>
+
+                    <div className="text-center text-sm text-gray-600 mt-2">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="text-blue-600 font-bold hover:underline">
+                            Sign up
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>
