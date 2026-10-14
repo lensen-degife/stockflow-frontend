@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import OrdersTable from './OrdersTable';
 import InventoryTable from './InventoryTable';
 import OrganizationModal from './OrganizationModal';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState('orders');
   const [isOrgModalOpen, setIsOrgModalOpen] = useState(false);
   const [currentOrg, setCurrentOrg] = useState(() => ({
@@ -16,6 +18,12 @@ export default function Dashboard() {
       id: org.id,
       name: org.name || org.id,
     });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('organization_id');
+    navigate('/login');
   };
 
   return (
@@ -39,6 +47,12 @@ export default function Dashboard() {
             className={`text-left px-4 py-2 rounded-md font-medium transition-colors cursor-pointer ${activeView === 'inventory' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800 text-gray-300'}`}
           >
             Inventory
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="mt-auto text-left px-4 py-2 rounded-md font-medium transition-colors cursor-pointer hover:bg-gray-800 text-gray-300"
+          >
+            Log Out
           </button>
         </nav>
       </aside>
