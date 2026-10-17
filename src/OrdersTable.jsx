@@ -5,6 +5,8 @@ import CreateOrderModal from './CreateOrderModal';
 import TableSkeleton from './TableSkeleton';
 
 export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
+    const userRole = localStorage.getItem('user_role');
+
     // State to track which order is clicked, and if the drawer is open
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -170,12 +172,14 @@ export default function OrdersTable({ onOpenOrgModal, activeOrgId }) {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-64 h-9 px-3 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500"
                     />
-                    <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
-                    >
-                        + Create Order
-                    </button>
+                    {(userRole === 'org_admin' || userRole === 'staff') && (
+                        <button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
+                        >
+                            + Create Order
+                        </button>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto">

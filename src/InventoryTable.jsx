@@ -4,6 +4,7 @@ import AdjustStockModal from './AdjustStockModal';
 import TableSkeleton from './TableSkeleton';
 
 export default function InventoryTable({ activeOrgId }) {
+    const userRole = localStorage.getItem('user_role');
     const [inventory, setInventory] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -50,12 +51,14 @@ export default function InventoryTable({ activeOrgId }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
                 <h2 className="text-lg font-bold text-gray-800">Current Stock Levels</h2>
-                <button
-                    onClick={() => setIsAdjustModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
-                >
-                    + Adjust Stock
-                </button>
+                {(userRole === 'org_admin' || userRole === 'staff') && (
+                    <button
+                        onClick={() => setIsAdjustModalOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer"
+                    >
+                        + Adjust Stock
+                    </button>
+                )}
             </div>
 
             {error && (

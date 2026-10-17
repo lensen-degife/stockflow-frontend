@@ -1,4 +1,6 @@
 export default function OrderDrawer({ isOpen, onClose, order, onUpdateStatus }) {
+    const userRole = localStorage.getItem('user_role');
+
     // If the drawer is closed, don't render anything
     if (!isOpen || !order) return null;
 
@@ -43,43 +45,45 @@ export default function OrderDrawer({ isOpen, onClose, order, onUpdateStatus }) 
                 </div>
 
                 {/* The State Machine Actions (Footer) */}
-                <div className="p-6 border-t border-gray-200 bg-white gap-3 flex flex-col">
+                {(userRole === 'org_admin' || userRole === 'staff') && (
+                    <div className="p-6 border-t border-gray-200 bg-white gap-3 flex flex-col">
 
-                    {order.status === 'DRAFT' && (
-                        <button
-                            onClick={() => onUpdateStatus(order.id, 'reserve', 'RESERVED')}
-                            className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition-colors"
-                        >
-                            Reserve Stock
-                        </button>
-                    )}
-
-                    {order.status === 'RESERVED' && (
-                        <>
+                        {order.status === 'DRAFT' && (
                             <button
-                                onClick={() => onUpdateStatus(order.id, 'confirm', 'CONFIRMED')}
-                                className="w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors"
+                                onClick={() => onUpdateStatus(order.id, 'reserve', 'RESERVED')}
+                                className="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition-colors"
                             >
-                                Confirm Order
+                                Reserve Stock
                             </button>
-                            <button
-                                onClick={() => onUpdateStatus(order.id, 'cancel', 'CANCELLED')}
-                                className="w-full bg-red-100 text-red-600 font-bold py-3 rounded-md hover:bg-red-200 transition-colors"
-                            >
-                                Cancel Order
-                            </button>
-                        </>
-                    )}
+                        )}
 
-                    {order.status === 'CONFIRMED' && (
-                        <button
-                            onClick={() => onUpdateStatus(order.id, 'fulfill', 'FULFILLED')}
-                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-md hover:bg-black transition-colors"
-                        >
-                            Mark as Fulfilled
-                        </button>
-                    )}
-                </div>
+                        {order.status === 'RESERVED' && (
+                            <>
+                                <button
+                                    onClick={() => onUpdateStatus(order.id, 'confirm', 'CONFIRMED')}
+                                    className="w-full bg-emerald-600 text-white font-bold py-3 rounded-md hover:bg-emerald-700 transition-colors"
+                                >
+                                    Confirm Order
+                                </button>
+                                <button
+                                    onClick={() => onUpdateStatus(order.id, 'cancel', 'CANCELLED')}
+                                    className="w-full bg-red-100 text-red-600 font-bold py-3 rounded-md hover:bg-red-200 transition-colors"
+                                >
+                                    Cancel Order
+                                </button>
+                            </>
+                        )}
+
+                        {order.status === 'CONFIRMED' && (
+                            <button
+                                onClick={() => onUpdateStatus(order.id, 'fulfill', 'FULFILLED')}
+                                className="w-full bg-gray-900 text-white font-bold py-3 rounded-md hover:bg-black transition-colors"
+                            >
+                                Mark as Fulfilled
+                            </button>
+                        )}
+                    </div>
+                )}
 
 
             </div>

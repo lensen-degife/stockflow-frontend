@@ -35,9 +35,11 @@ export default function Login() {
 
             // 2. Decode the token to extract organization_id
             let organizationId = null;
+            let role = null;
             try {
                 const decodedToken = jwtDecode(data.data.token);
                 organizationId = decodedToken?.organization_id;
+                role = decodedToken?.role;
             } catch (decodeError) {
                 console.error("Failed to decode token", decodeError);
             }
@@ -46,6 +48,14 @@ export default function Login() {
             if (!organizationId && data?.data?.user?.organization_id) {
                 organizationId = data.data.user.organization_id;
             }
+
+            // Fallback to checking data.data.user.role
+            if (!role && data?.data?.user?.role) {
+                role = data.data.user.role;
+            }
+
+            // Save user_role to localStorage (fallback to 'viewer' if undefined)
+            localStorage.setItem('user_role', role || 'viewer');
 
             // Save organization_id to localStorage
             if (organizationId) {
